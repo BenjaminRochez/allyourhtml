@@ -3,11 +3,12 @@ varying vec2 vUv;
 varying vec3 vPosition;
 uniform vec2 pixels;
 float PI = 3.141592653589793238;
+uniform float distanceFromCenter;
 void main() {
 
   // hotfix for the image being distorted while floating
   //vUv = uv;
-  vUv = (uv - vec2(0.5))*0.9 + vec2(0.5);
+  vUv = (uv - vec2(0.5))*(0.8-0.2 * distanceFromCenter*(2. - distanceFromCenter)) + vec2(0.5);
 
   vec3 pos = position;
 
