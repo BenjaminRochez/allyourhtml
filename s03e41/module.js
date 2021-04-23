@@ -57,6 +57,8 @@ export default class Sketch {
       this.scene.add(mesh);
       this.meshes.push(mesh);
       mesh.position.y = i*1.2;
+      //mesh.rotation.y = -0.5;
+      
     })
   }
   settings() {

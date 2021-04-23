@@ -36807,7 +36807,7 @@ var Sketch = /*#__PURE__*/function () {
 
         _this.meshes.push(mesh);
 
-        mesh.position.y = i * 1.2;
+        mesh.position.y = i * 1.2; //mesh.rotation.y = -0.5;
       });
     }
   }, {
@@ -36952,14 +36952,18 @@ function raf() {
   objs.forEach(function (o, i) {
     o.dist = Math.min(Math.abs(position - i), 1);
     o.dist = 1 - Math.pow(o.dist, 2);
-    elems[i].style.transform = "scale(".concat(1 + 0.4 * o.dist, ")");
+    var scale = 1 + 0.2 * o.dist;
+    elems[i].style.transform = "scale(".concat(1 + 0.4 * o.dist, ")"); // Scrolling shader : position of the mesh is equal of 2 times the position - 1.2 * the current mesh
+
+    sketch.meshes[i].position.y = 1.2 * i - position * 1.2;
+    sketch.meshes[i].scale.set(scale, scale, scale);
   }); // Lerp
 
   var diff = rounded - position;
   position += Math.sign(diff) * Math.pow(Math.abs(diff), 0.5) * 0.015; //console.log(position);
   //block.style.transform = `translate(0,${position*100 + 50}px)`
 
-  wrap.style.transform = "translate(0,".concat(-position * 100 + 50, "px)");
+  wrap.style.transform = "translate(0,".concat(-position * 100 - 50, "px)");
   window.requestAnimationFrame(raf);
 }
 
