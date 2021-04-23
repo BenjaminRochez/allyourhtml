@@ -35689,9 +35689,9 @@ if (typeof window !== 'undefined') {
   }
 }
 },{}],"shader/fragment.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nuniform float time;\nuniform float progress;\nuniform sampler2D texture1;\nuniform vec4 resolution;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nfloat PI = 3.141592653589793238;\nvoid main()\t{\n\n\tvec4 t = texture2D(texture1, vUv);\n\t// vec2 newUV = (vUv - vec2(0.5))*resolution.zw + vec2(0.5);\n\t//gl_FragColor = vec4(vUv,0.0,1.);\n\tgl_FragColor = t;\n}";
+module.exports = "#define GLSLIFY 1\nuniform float time;\nuniform float progress;\nuniform float distanceFromCenter;\nuniform sampler2D texture1;\nuniform vec4 resolution;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nfloat PI = 3.141592653589793238;\nvoid main()\t{\n\n\tvec4 t = texture2D(texture1, vUv);\n\t// vec2 newUV = (vUv - vec2(0.5))*resolution.zw + vec2(0.5);\n\t//gl_FragColor = vec4(vUv,0.0,1.);\n\n\t//Making the not active image be black and white\n\tfloat bw = (t.r + t.b + t.g)/3.;\n\tvec4 colorless = vec4(bw, bw, bw, 1.);\n\n\t//gl_FragColor = t;\n\tgl_FragColor = mix(colorless, t, distanceFromCenter);\n\tgl_FragColor.a = clamp(distanceFromCenter, 0.2, 1.);\n}";
 },{}],"shader/vertex.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nuniform float time;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nuniform vec2 pixels;\nfloat PI = 3.141592653589793238;\nvoid main() {\n\n  // hotfix for the image being distorted while floating\n  //vUv = uv;\n  vUv = (uv - vec2(0.5))*0.9 + vec2(0.5);\n\n  vec3 pos = position;\n  \n  // floating effect\n  pos.y += sin(time*0.3) * 0.02;\n  vUv.y -= sin(time*0.3) * 0.02;\n  gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );\n}";
+module.exports = "#define GLSLIFY 1\nuniform float time;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nuniform vec2 pixels;\nfloat PI = 3.141592653589793238;\nvoid main() {\n\n  // hotfix for the image being distorted while floating\n  //vUv = uv;\n  vUv = (uv - vec2(0.5))*0.9 + vec2(0.5);\n\n  vec3 pos = position;\n\n  pos.y += sin(PI*uv.x)*0.02;\n  pos.z += sin(PI*uv.x)*0.02;\n\n  // floating effect\n  pos.y += sin(time*0.3) * 0.02;\n  vUv.y -= sin(time*0.3) * 0.02;\n  gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );\n}";
 },{}],"node_modules/three-orbit-controls/index.js":[function(require,module,exports) {
 module.exports = function( THREE ) {
 	/**
@@ -36762,7 +36762,9 @@ var Sketch = /*#__PURE__*/function () {
     this.container = options.dom;
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.width, this.height);
     this.renderer.setClearColor(0xeeeeee, 1);
@@ -36783,6 +36785,7 @@ var Sketch = /*#__PURE__*/function () {
 
     this.materials = [];
     this.meshes = [];
+    this.groups = [];
     this.handleImages();
   }
 
@@ -36798,16 +36801,24 @@ var Sketch = /*#__PURE__*/function () {
 
         _this.materials.push(mat);
 
+        var group = new THREE.Group(); //mat.wireframe = true;
+
         mat.uniforms.texture1.value = new THREE.Texture(im);
         mat.uniforms.texture1.value.needsUpdate = true;
         var geo = new THREE.PlaneBufferGeometry(1.5, 1, 20, 20);
         var mesh = new THREE.Mesh(geo, mat);
+        group.add(mesh);
 
-        _this.scene.add(mesh);
+        _this.groups.push(group);
+
+        _this.scene.add(group);
 
         _this.meshes.push(mesh);
 
-        mesh.position.y = i * 1.2; //mesh.rotation.y = -0.5;
+        mesh.position.y = i * 1.2;
+        group.rotation.y = -0.5;
+        group.rotation.x = -0.3;
+        group.rotation.z = -0.1;
       });
     }
   }, {
@@ -36852,6 +36863,10 @@ var Sketch = /*#__PURE__*/function () {
             type: "f",
             value: 0
           },
+          distanceFromCenter: {
+            type: 'f',
+            value: 0
+          },
           resolution: {
             type: "v4",
             value: new THREE.Vector4()
@@ -36861,7 +36876,7 @@ var Sketch = /*#__PURE__*/function () {
           }
         },
         // wireframe: true,
-        // transparent: true,
+        transparent: true,
         vertexShader: _vertex.default,
         fragmentShader: _fragment.default
       }); // this.geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
@@ -36957,6 +36972,7 @@ function raf() {
 
     sketch.meshes[i].position.y = -1.2 * i + position * 1.2;
     sketch.meshes[i].scale.set(scale, scale, scale);
+    sketch.meshes[i].material.uniforms.distanceFromCenter.value = o.dist;
   }); // Lerp
 
   var diff = rounded - position;

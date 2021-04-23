@@ -40,6 +40,8 @@ function raf() {
         
         sketch.meshes[i].position.y = -1.2*i + position*1.2;
         sketch.meshes[i].scale.set(scale, scale, scale);
+
+        sketch.meshes[i].material.uniforms.distanceFromCenter.value = o.dist;
     });
 
     // Lerp
