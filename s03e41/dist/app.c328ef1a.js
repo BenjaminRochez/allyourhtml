@@ -36939,6 +36939,8 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
+var attractMode = false;
+var attractTo = 0;
 var speed = 0;
 var position = 0;
 var runded = 0;
@@ -36973,18 +36975,41 @@ function raf() {
     sketch.meshes[i].position.y = -1.2 * i + position * 1.2;
     sketch.meshes[i].scale.set(scale, scale, scale);
     sketch.meshes[i].material.uniforms.distanceFromCenter.value = o.dist;
-  }); // Lerp
+  });
+  var diff = rounded - position; // Attractmode
 
-  var diff = rounded - position;
-  position += Math.sign(diff) * Math.pow(Math.abs(diff), 0.5) * 0.015; //console.log(position);
-  //block.style.transform = `translate(0,${position*100 + 50}px)`
+  if (attractMode) {
+    position += -(position - attractTo) * 0.04;
+  } else {
+    // Lerp
+    //let diff = rounded - position;
+    position += Math.sign(diff) * Math.pow(Math.abs(diff), 0.5) * 0.015; //console.log(position);
+    //block.style.transform = `translate(0,${position*100 + 50}px)`
 
-  wrap.style.transform = "translate(0,".concat(-position * 100 - 50, "px)");
+    wrap.style.transform = "translate(0,".concat(-position * 100 - 50, "px)");
+  }
+
   window.requestAnimationFrame(raf);
 }
 
 ;
 raf();
+
+var navs = _toConsumableArray(document.querySelectorAll('li'));
+
+var nav = document.querySelector('.nav');
+nav.addEventListener('mouseenter', function () {
+  attractMode = true;
+});
+nav.addEventListener('mouseleave', function () {
+  attractMode = false;
+});
+navs.forEach(function (el) {
+  el.addEventListener('mouseover', function (e) {
+    console.log(e.target.getAttribute('data-nav'));
+    attractTo = Number(e.target.getAttribute('data-nav'));
+  });
+});
 },{"./module":"module.js"}],"../../../../../usr/local/share/.config/yarn/global/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
