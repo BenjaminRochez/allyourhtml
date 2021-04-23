@@ -118,24 +118,51 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   return newRequire;
 })({"app.js":[function(require,module,exports) {
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 var speed = 0;
 var position = 0;
 var runded = 0;
 var block = document.getElementById('block');
+var wrap = document.getElementById('wrap');
+
+var elems = _toConsumableArray(document.querySelectorAll('.n')); // Event listener
+
+
 window.addEventListener('wheel', function (e) {
   speed += e.deltaY * 0.0003;
+});
+var objs = Array(5).fill({
+  dist: 0
 }); // Request animation frame
 
 function raf() {
   position += speed; // Inertia
 
   speed *= 0.8;
-  rounded = Math.round(position); // Lerp
+  rounded = Math.round(position); // Update the scale of the object depending of the distance from the cube
+
+  objs.forEach(function (o, i) {
+    o.dist = Math.min(Math.abs(position - i), 1);
+    o.dist = 1 - Math.pow(o.dist, 2);
+    elems[i].style.transform = "scale(".concat(1 + 0.4 * o.dist, ")");
+  }); // Lerp
 
   var diff = rounded - position;
-  position += Math.sign(diff) * Math.pow(Math.abs(diff), 0.5) * 0.015;
-  console.log(position);
-  block.style.transform = "translate(0,".concat(position * 100, "px)");
+  position += Math.sign(diff) * Math.pow(Math.abs(diff), 0.5) * 0.015; //console.log(position);
+  //block.style.transform = `translate(0,${position*100 + 50}px)`
+
+  wrap.style.transform = "translate(0,".concat(-position * 100 + 50, "px)");
   window.requestAnimationFrame(raf);
 }
 
