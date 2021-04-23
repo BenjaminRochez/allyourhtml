@@ -39,9 +39,21 @@ export default class Sketch {
     this.render();
     this.setupResize();
     // this.settings();
-    
+    this.handleImages();
   }
 
+  handleImages(){
+    let images = [...document.querySelectorAll('img')];
+    images.forEach((im,i)=>{
+      let mat = this.material.clone();
+      mat.uniforms.texture1.value = new THREE.Texture(im);
+      mat.uniforms.texture1.value.needsUpdate = true;
+      let geo = new THREE.PlaneBufferGeometry(1.5, 1, 20, 20);
+      let mesh = new THREE.Mesh(geo, mat);
+      this.scene.add(mesh);
+      mesh.position.y = i*1.2;
+    })
+  }
   settings() {
     let that = this;
     this.settings = {
@@ -71,6 +83,7 @@ export default class Sketch {
       },
       side: THREE.DoubleSide,
       uniforms: {
+        texture1: {type: "t", value: null},
         time: { type: "f", value: 0 },
         resolution: { type: "v4", value: new THREE.Vector4() },
         uvRate1: {

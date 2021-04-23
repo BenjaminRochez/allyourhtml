@@ -35689,7 +35689,7 @@ if (typeof window !== 'undefined') {
   }
 }
 },{}],"shader/fragment.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nuniform float time;\nuniform float progress;\nuniform sampler2D texture1;\nuniform vec4 resolution;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nfloat PI = 3.141592653589793238;\nvoid main()\t{\n\t// vec2 newUV = (vUv - vec2(0.5))*resolution.zw + vec2(0.5);\n\tgl_FragColor = vec4(vUv,0.0,1.);\n}";
+module.exports = "#define GLSLIFY 1\nuniform float time;\nuniform float progress;\nuniform sampler2D texture1;\nuniform vec4 resolution;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nfloat PI = 3.141592653589793238;\nvoid main()\t{\n\n\tvec4 t = texture2D(texture1, vUv);\n\t// vec2 newUV = (vUv - vec2(0.5))*resolution.zw + vec2(0.5);\n\t//gl_FragColor = vec4(vUv,0.0,1.);\n\tgl_FragColor = t;\n}";
 },{}],"shader/vertex.glsl":[function(require,module,exports) {
 module.exports = "#define GLSLIFY 1\nuniform float time;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nuniform vec2 pixels;\nfloat PI = 3.141592653589793238;\nvoid main() {\n  vUv = uv;\n  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n}";
 },{}],"node_modules/three-orbit-controls/index.js":[function(require,module,exports) {
@@ -36734,6 +36734,18 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -36768,9 +36780,31 @@ var Sketch = /*#__PURE__*/function () {
     this.resize();
     this.render();
     this.setupResize(); // this.settings();
+
+    this.handleImages();
   }
 
   _createClass(Sketch, [{
+    key: "handleImages",
+    value: function handleImages() {
+      var _this = this;
+
+      var images = _toConsumableArray(document.querySelectorAll('img'));
+
+      images.forEach(function (im, i) {
+        var mat = _this.material.clone();
+
+        mat.uniforms.texture1.value = new THREE.Texture(im);
+        mat.uniforms.texture1.value.needsUpdate = true;
+        var geo = new THREE.PlaneBufferGeometry(1.5, 1, 20, 20);
+        var mesh = new THREE.Mesh(geo, mat);
+
+        _this.scene.add(mesh);
+
+        mesh.position.y = i * 1.2;
+      });
+    }
+  }, {
     key: "settings",
     value: function settings() {
       var that = this;
@@ -36804,6 +36838,10 @@ var Sketch = /*#__PURE__*/function () {
         },
         side: THREE.DoubleSide,
         uniforms: {
+          texture1: {
+            type: "t",
+            value: null
+          },
           time: {
             type: "f",
             value: 0
@@ -36895,7 +36933,7 @@ function raf() {
   position += speed; // Inertia
 
   speed *= 0.8;
-  rounded = Math.round(position); // Update the scale of the object depending of the distance from the cube
+  var rounded = Math.round(position); // Update the scale of the object depending of the distance from the cube
 
   objs.forEach(function (o, i) {
     o.dist = Math.min(Math.abs(position - i), 1);

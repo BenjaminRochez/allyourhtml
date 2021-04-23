@@ -25,7 +25,7 @@ function raf() {
 
     // Inertia
     speed *= 0.8;
-    rounded = Math.round(position);
+    let rounded = Math.round(position);
 
     // Update the scale of the object depending of the distance from the cube
     objs.forEach((o, i) => {
