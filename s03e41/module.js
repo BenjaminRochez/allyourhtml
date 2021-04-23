@@ -39,18 +39,23 @@ export default class Sketch {
     this.render();
     this.setupResize();
     // this.settings();
+    this.materials = [];
+    this.meshes = [];
     this.handleImages();
+    
   }
 
   handleImages(){
     let images = [...document.querySelectorAll('img')];
     images.forEach((im,i)=>{
       let mat = this.material.clone();
+      this.materials.push(mat);
       mat.uniforms.texture1.value = new THREE.Texture(im);
       mat.uniforms.texture1.value.needsUpdate = true;
       let geo = new THREE.PlaneBufferGeometry(1.5, 1, 20, 20);
       let mesh = new THREE.Mesh(geo, mat);
       this.scene.add(mesh);
+      this.meshes.push(mesh);
       mesh.position.y = i*1.2;
     })
   }
@@ -96,10 +101,10 @@ export default class Sketch {
       fragmentShader: fragment
     });
 
-    this.geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
+    // this.geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
 
-    this.plane = new THREE.Mesh(this.geometry, this.material);
-    this.scene.add(this.plane);
+    // this.plane = new THREE.Mesh(this.geometry, this.material);
+    // this.scene.add(this.plane);
   }
 
   stop() {
@@ -116,7 +121,13 @@ export default class Sketch {
   render() {
     if (!this.isPlaying) return;
     this.time += 0.05;
-    this.material.uniforms.time.value = this.time;
+    if(this.materials){
+      this.materials.forEach(m =>{
+        m.uniforms.time.value = this.time;
+      })
+    }
+
+    //this.material.uniforms.time.value = this.time;
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
   }

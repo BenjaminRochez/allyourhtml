@@ -35691,7 +35691,7 @@ if (typeof window !== 'undefined') {
 },{}],"shader/fragment.glsl":[function(require,module,exports) {
 module.exports = "#define GLSLIFY 1\nuniform float time;\nuniform float progress;\nuniform sampler2D texture1;\nuniform vec4 resolution;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nfloat PI = 3.141592653589793238;\nvoid main()\t{\n\n\tvec4 t = texture2D(texture1, vUv);\n\t// vec2 newUV = (vUv - vec2(0.5))*resolution.zw + vec2(0.5);\n\t//gl_FragColor = vec4(vUv,0.0,1.);\n\tgl_FragColor = t;\n}";
 },{}],"shader/vertex.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nuniform float time;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nuniform vec2 pixels;\nfloat PI = 3.141592653589793238;\nvoid main() {\n  vUv = uv;\n  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n}";
+module.exports = "#define GLSLIFY 1\nuniform float time;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nuniform vec2 pixels;\nfloat PI = 3.141592653589793238;\nvoid main() {\n\n  // hotfix for the image being distorted while floating\n  //vUv = uv;\n  vUv = (uv - vec2(0.5))*0.9 + vec2(0.5);\n\n  vec3 pos = position;\n  \n  // floating effect\n  pos.y += sin(time*0.3) * 0.02;\n  vUv.y -= sin(time*0.3) * 0.02;\n  gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );\n}";
 },{}],"node_modules/three-orbit-controls/index.js":[function(require,module,exports) {
 module.exports = function( THREE ) {
 	/**
@@ -36781,6 +36781,8 @@ var Sketch = /*#__PURE__*/function () {
     this.render();
     this.setupResize(); // this.settings();
 
+    this.materials = [];
+    this.meshes = [];
     this.handleImages();
   }
 
@@ -36794,12 +36796,16 @@ var Sketch = /*#__PURE__*/function () {
       images.forEach(function (im, i) {
         var mat = _this.material.clone();
 
+        _this.materials.push(mat);
+
         mat.uniforms.texture1.value = new THREE.Texture(im);
         mat.uniforms.texture1.value.needsUpdate = true;
         var geo = new THREE.PlaneBufferGeometry(1.5, 1, 20, 20);
         var mesh = new THREE.Mesh(geo, mat);
 
         _this.scene.add(mesh);
+
+        _this.meshes.push(mesh);
 
         mesh.position.y = i * 1.2;
       });
@@ -36858,10 +36864,9 @@ var Sketch = /*#__PURE__*/function () {
         // transparent: true,
         vertexShader: _vertex.default,
         fragmentShader: _fragment.default
-      });
-      this.geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
-      this.plane = new THREE.Mesh(this.geometry, this.material);
-      this.scene.add(this.plane);
+      }); // this.geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
+      // this.plane = new THREE.Mesh(this.geometry, this.material);
+      // this.scene.add(this.plane);
     }
   }, {
     key: "stop",
@@ -36879,9 +36884,18 @@ var Sketch = /*#__PURE__*/function () {
   }, {
     key: "render",
     value: function render() {
+      var _this2 = this;
+
       if (!this.isPlaying) return;
       this.time += 0.05;
-      this.material.uniforms.time.value = this.time;
+
+      if (this.materials) {
+        this.materials.forEach(function (m) {
+          m.uniforms.time.value = _this2.time;
+        });
+      } //this.material.uniforms.time.value = this.time;
+
+
       requestAnimationFrame(this.render.bind(this));
       this.renderer.render(this.scene, this.camera);
     }
