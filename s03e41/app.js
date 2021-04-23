@@ -38,7 +38,7 @@ function raf() {
 
         // Scrolling shader : position of the mesh is equal of 2 times the position - 1.2 * the current mesh
         
-        sketch.meshes[i].position.y = 1.2*i - position*1.2;
+        sketch.meshes[i].position.y = -1.2*i + position*1.2;
         sketch.meshes[i].scale.set(scale, scale, scale);
     });
 
