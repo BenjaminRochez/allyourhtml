@@ -5,7 +5,7 @@ let attractMode = false;
 let attractTo = 0;
 let speed = 0;
 let position = 0;
-let runded = 0;
+let rounded = 0;
 let block = document.getElementById('block');
 let wrap = document.getElementById('wrap');
 let elems = [...document.querySelectorAll('.n')];
@@ -28,7 +28,7 @@ function raf() {
 
     // Inertia
     speed *= 0.8;
-    let rounded = Math.round(position);
+    rounded = Math.round(position);
 
     // Update the scale of the object depending of the distance from the cube
     objs.forEach((o, i) => {
@@ -36,15 +36,17 @@ function raf() {
         o.dist = 1 - o.dist ** 2;
 
         let scale = 1 + 0.2 * o.dist;
-
         elems[i].style.transform = `scale(${1 + 0.4 * o.dist})`
 
         // Scrolling shader : position of the mesh is equal of 2 times the position - 1.2 * the current mesh
 
-        sketch.meshes[i].position.y = -1.2 * i + position * 1.2;
+        if(rounded >=0 && rounded <=4){
+            sketch.meshes[i].position.y = -1.2 * i + position * 1.2;
         sketch.meshes[i].scale.set(scale, scale, scale);
 
         sketch.meshes[i].material.uniforms.distanceFromCenter.value = o.dist;
+        }
+        
     });
 
     let diff = rounded - position;
@@ -60,10 +62,6 @@ function raf() {
         //block.style.transform = `translate(0,${position*100 + 50}px)`
         wrap.style.transform = `translate(0,${-position * 100 - 50}px)`;
     }
-
-
-
-
     window.requestAnimationFrame(raf);
 };
 

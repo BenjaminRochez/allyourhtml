@@ -42436,7 +42436,7 @@ var attractMode = false;
 var attractTo = 0;
 var speed = 0;
 var position = 0;
-var runded = 0;
+var rounded = 0;
 var block = document.getElementById('block');
 var wrap = document.getElementById('wrap');
 
@@ -42457,7 +42457,7 @@ function raf() {
   position += speed; // Inertia
 
   speed *= 0.8;
-  var rounded = Math.round(position); // Update the scale of the object depending of the distance from the cube
+  rounded = Math.round(position); // Update the scale of the object depending of the distance from the cube
 
   objs.forEach(function (o, i) {
     o.dist = Math.min(Math.abs(position - i), 1);
@@ -42465,9 +42465,11 @@ function raf() {
     var scale = 1 + 0.2 * o.dist;
     elems[i].style.transform = "scale(".concat(1 + 0.4 * o.dist, ")"); // Scrolling shader : position of the mesh is equal of 2 times the position - 1.2 * the current mesh
 
-    sketch.meshes[i].position.y = -1.2 * i + position * 1.2;
-    sketch.meshes[i].scale.set(scale, scale, scale);
-    sketch.meshes[i].material.uniforms.distanceFromCenter.value = o.dist;
+    if (rounded >= 0 && rounded <= 4) {
+      sketch.meshes[i].position.y = -1.2 * i + position * 1.2;
+      sketch.meshes[i].scale.set(scale, scale, scale);
+      sketch.meshes[i].material.uniforms.distanceFromCenter.value = o.dist;
+    }
   });
   var diff = rounded - position; // Attractmode
 
